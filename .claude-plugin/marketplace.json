@@ -1,0 +1,14 @@
+{
+  "name": "ex-subagent",
+  "owner": {
+    "name": "krystianslowik"
+  },
+  "description": "merc: hire coding agents on any model from Claude Code",
+  "plugins": [
+    {
+      "name": "merc",
+      "source": "./",
+      "description": "Hire coding agents on any model through opencode, shown as native Claude Code subagents"
+    }
+  ]
+}

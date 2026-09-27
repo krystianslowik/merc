@@ -1,0 +1,16 @@
+{
+  "name": "merc",
+  "version": "0.5.0",
+  "description": "Hire coding agents on any model through opencode, shown as native Claude Code subagents",
+  "author": {
+    "name": "krystianslowik"
+  },
+  "mcpServers": {
+    "opencode": {
+      "command": "node",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/src/mcp.ts"
+      ]
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "merc",
+  "version": "0.5.0",
+  "description": "Run opencode agents (any provider/model) from Claude Code as native-looking subagents",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "merc": "src/cli.ts"
+  },
+  "scripts": {
+    "mcp": "node src/mcp.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test \"test/**/*.test.ts\""
+  },
+  "engines": {
+    "node": ">=23.6"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "^2.1.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.0",
+    "typescript": "^7.0.2"
+  }
+}
