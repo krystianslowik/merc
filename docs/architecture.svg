@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="540" viewBox="0 0 900 540" role="img" aria-labelledby="title description">
+  <title id="title">merc architecture</title>
+  <desc id="description">
+    Claude Code's main session calls a merc subagent such as merc:luna, a thin
+    Sonnet relay. The relay calls start on the merc MCP server, then calls wait
+    repeatedly until done; each wait returns the next batch of steps. Cancel is
+    optional and stops opencode's process group. The MCP server spawns opencode
+    run --format json in its own process group, reads the JSONL stdout stream,
+    and formats tool, text, and error events as Claude Code-style transcript
+    lines. Transcript batches, the final answer, and a cost footer return through
+    the relay to Claude Code. Opencode talks to any provider, including OpenAI,
+    OpenRouter, Google, and local models. Separately, opencode writes its SQLite
+    store; merc watch and the status line read that store live, read-only.
+  </desc>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --text: #24292f;
+      --muted: #57606a;
+      --surface: #f6f8fa;
+      --border: #afb8c1;
+      --line: #6e7781;
+      --accent: #e8743b;
+      --accent-text: #a44217;
+      --accent-surface: #fff5ee;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --text: #e6edf3;
+        --muted: #a8b3bf;
+        --surface: #161b22;
+        --border: #59636e;
+        --line: #8b949e;
+        --accent: #e8743b;
+        --accent-text: #ffad80;
+        --accent-surface: #2b211d;
+      }
+    }
+    text {
+      fill: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+      font-size: 13px;
+    }
+    .brand { fill: var(--accent-text); font-size: 28px; font-weight: 700; }
+    .subtitle { fill: var(--muted); font-size: 14px; }
+    .heading { font-size: 16px; font-weight: 650; }
+    .small-heading { font-size: 14px; font-weight: 650; }
+    .muted { fill: var(--muted); }
+    .small { font-size: 12px; }
+    .edge-label { fill: var(--muted); font-size: 11px; }
+    .code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .accent-text { fill: var(--accent-text); }
+    .box { fill: var(--surface); stroke: var(--border); stroke-width: 1.25; }
+    .merc { fill: var(--accent-surface); stroke: var(--accent); }
+    .arrow { fill: none; stroke: var(--line); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+    .accent-arrow { stroke: var(--accent); }
+    .side-channel { stroke-dasharray: 4 5; }
+    .divider { stroke: var(--accent); stroke-opacity: .4; }
+    .arrowhead { fill: var(--line); }
+    .accent-arrowhead { fill: var(--accent); }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path class="arrowhead" d="M0 0 8 4 0 8Z"/>
+    </marker>
+    <marker id="accent-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+      <path class="accent-arrowhead" d="M0 0 8 4 0 8Z"/>
+    </marker>
+  </defs>
+
+  <text class="brand" x="24" y="42">merc</text>
+  <text class="subtitle" x="24" y="68">Subagent execution and live observability</text>
+
+  <!-- Main execution path, left to right. -->
+  <g text-anchor="middle">
+    <rect class="box" x="24" y="124" width="130" height="210" rx="14"/>
+    <text class="heading" x="89" y="166">Claude Code</text>
+    <text class="muted" x="89" y="190">main session</text>
+    <text class="muted small" x="89" y="264">delegates task</text>
+    <text class="muted small" x="89" y="286">receives result</text>
+
+    <rect class="box merc" x="186" y="124" width="132" height="210" rx="14"/>
+    <text class="heading code accent-text" x="252" y="166">merc:luna</text>
+    <text x="252" y="190">merc subagent</text>
+    <text class="muted small" x="252" y="212">thin Sonnet relay</text>
+    <text class="muted small" x="252" y="264">forwards prompt</text>
+    <text class="muted small" x="252" y="286">copies final answer</text>
+
+    <rect class="box merc" x="350" y="124" width="174" height="210" rx="14"/>
+    <text class="heading accent-text" x="437" y="166">merc MCP server</text>
+    <path class="divider" d="M364 268H510"/>
+    <text x="437" y="292">JSONL → transcript</text>
+    <text class="muted small" x="437" y="314">Claude Code style</text>
+
+    <rect class="box" x="556" y="124" width="164" height="210" rx="14"/>
+    <text class="heading" x="638" y="166">opencode</text>
+    <text class="code" x="638" y="198">opencode run</text>
+    <text class="code" x="638" y="218">--format json</text>
+    <text class="muted small" x="638" y="250">own process group</text>
+    <text x="638" y="292">JSONL events</text>
+    <text class="muted small" x="638" y="314">stdout stream</text>
+
+    <rect class="box" x="752" y="124" width="124" height="210" rx="14"/>
+    <text class="small-heading" x="814" y="166">Any provider</text>
+    <text x="814" y="198">OpenAI</text>
+    <text x="814" y="224">OpenRouter</text>
+    <text x="814" y="250">Google</text>
+    <text x="814" y="276">local models</text>
+  </g>
+
+  <!-- The relay starts once, then waits in a loop; cancellation is optional. -->
+  <text class="code accent-text" x="370" y="196">start</text>
+  <path class="arrow accent-arrow" d="M385 201V214" marker-end="url(#accent-arrow)"/>
+  <text class="code accent-text" x="370" y="231">wait</text>
+  <path class="arrow accent-arrow" d="M411 221H444Q452 221 452 229V231Q452 239 444 239H416" marker-end="url(#accent-arrow)"/>
+  <text class="edge-label" x="459" y="232">loop</text>
+  <text class="code muted small" x="370" y="256">cancel<tspan class="muted" font-family="system-ui, -apple-system, Segoe UI, sans-serif"> (optional)</tspan></text>
+
+  <g text-anchor="middle">
+    <text class="edge-label" x="170" y="181">call</text>
+    <path class="arrow" d="M154 196H184" marker-end="url(#arrow)"/>
+    <text class="edge-label" x="334" y="181">MCP</text>
+    <path class="arrow accent-arrow" d="M318 196H348" marker-end="url(#accent-arrow)"/>
+    <text class="edge-label" x="540" y="190">spawn</text>
+    <path class="arrow" d="M524 205H554" marker-end="url(#arrow)"/>
+    <path class="arrow" d="M723 205H749" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+  </g>
+
+  <!-- JSONL is consumed by the MCP server, not by the relay or store readers. -->
+  <path class="arrow" d="M556 292H526" marker-end="url(#arrow)"/>
+
+  <!-- Tool results return through the relay to the main session. -->
+  <path class="arrow accent-arrow" d="M437 334V356Q437 366 427 366H262Q252 366 252 356V336" marker-end="url(#accent-arrow)"/>
+  <path class="arrow accent-arrow" d="M238 334V356Q238 366 228 366H99Q89 366 89 356V336" marker-end="url(#accent-arrow)"/>
+  <text class="accent-text" x="24" y="395">transcript batches + final answer + cost footer</text>
+  <text class="small-heading" x="24" y="457"><tspan class="code">wait</tspan> repeats until done</text>
+  <text class="muted" x="24" y="481">Each wait returns the next batch of steps.</text>
+
+  <!-- Independent observability side channel: opencode writes, merc reads. -->
+  <path class="arrow side-channel" d="M638 334V428" marker-end="url(#arrow)"/>
+  <text class="edge-label" x="650" y="367">SIDE CHANNEL</text>
+  <text class="muted small" x="650" y="389">writes</text>
+  <g text-anchor="middle">
+    <rect class="box" x="556" y="430" width="164" height="82" rx="14"/>
+    <text class="small-heading" x="638" y="460">opencode store</text>
+    <text class="muted" x="638" y="484">SQLite</text>
+
+    <text class="muted small" x="814" y="417">live, read-only</text>
+    <rect class="box merc" x="752" y="430" width="124" height="82" rx="14"/>
+    <text class="code accent-text" x="814" y="456">merc watch</text>
+    <text x="814" y="478">status line</text>
+    <text class="code muted small" x="814" y="498">merc status</text>
+  </g>
+  <path class="arrow side-channel" d="M720 471H750" marker-end="url(#arrow)"/>
+</svg>
